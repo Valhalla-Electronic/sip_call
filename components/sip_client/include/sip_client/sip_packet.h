@@ -53,6 +53,7 @@ public:
     };
 
     using ViaT = std::array<std::string, 5>;
+    using RecordRouteT = std::array<std::string, 5>;
 
     SipPacket(char* input_buffer, size_t input_buffer_length)
         : m_buffer(input_buffer)
@@ -142,6 +143,11 @@ public:
         return m_via;
     }
 
+    const RecordRouteT& get_record_route() const
+    {
+        return m_record_route;
+    }
+
     std::string get_p_called_party_id() const
     {
         return m_p_called_party_id;
@@ -180,6 +186,7 @@ private:
         m_to = "";
         m_from = "";
         m_via.fill("");
+        m_record_route.fill("");
         m_p_called_party_id = "";
         m_dtmf_signal = ' ';
         m_dtmf_duration = 0;
@@ -270,6 +277,10 @@ private:
             else if (strstr(start_position, VIA) == start_position)
             {
                 append_via(std::string(start_position + strlen(VIA)));
+            }
+            else if (strstr(start_position, RECORD_ROUTE) == start_position)
+            {
+                append_record_route(std::string(start_position + strlen(RECORD_ROUTE)));
             }
             else if (strstr(start_position, C_SEQ) == start_position)
             {
@@ -474,6 +485,18 @@ private:
         }
     }
 
+    void append_record_route(const std::string& record_route)
+    {
+        for (auto& rr: m_record_route)
+        {
+            if (rr.empty())
+            {
+                rr = record_route;
+                return;
+            }
+        }
+    }
+
     char* m_buffer;
     const size_t m_buffer_length;
 
@@ -491,6 +514,7 @@ private:
     std::string m_to;
     std::string m_from;
     ViaT m_via;
+    RecordRouteT m_record_route;
     std::string m_p_called_party_id;
     std::string m_media;
     std::string m_cip;
@@ -511,6 +535,7 @@ private:
     static constexpr const char* TO = "To: ";
     static constexpr const char* FROM = "From: ";
     static constexpr const char* VIA = "Via: ";
+    static constexpr const char* RECORD_ROUTE = "Record-Route: ";
     static constexpr const char* P_CALLED_PARTY_ID = "P-Called-Party-ID: ";
     static constexpr const char* C_SEQ = "CSeq: ";
     static constexpr const char* CALL_ID = "Call-ID: ";
